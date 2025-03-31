@@ -70,6 +70,17 @@ def get_jobs():
     conn.close()
     return jobs
 
+def get_jobs_by_recruiter(recruiter_username):
+    """Fetches jobs posted by a specific recruiter."""
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT id, title, description FROM jobs WHERE recruiter = ?", (recruiter_username,))
+    jobs = cursor.fetchall()
+    
+    conn.close()
+    return jobs
+    
 def insert_resume(username, name, email, phone, skills, experience, education, resume_file):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
@@ -82,9 +93,16 @@ def insert_resume(username, name, email, phone, skills, experience, education, r
 
 
 def get_applicants(job_id):
-    conn = sqlite3.connect("database.db")  # ✅ Fix
+    """Fetches applicants for a given job ID with their username and resume file."""
+    conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT name, score FROM resumes WHERE job_id=?", (job_id,))
+
+    cursor.execute('''
+        SELECT a.username, a.resume_file
+        FROM applications a
+        WHERE a.job_id = ?
+    ''', (job_id,))
+
     applicants = cursor.fetchall()
     conn.close()
     return applicants
